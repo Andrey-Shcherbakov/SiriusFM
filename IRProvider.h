@@ -1,8 +1,10 @@
 #pragma once
 #include <iostream>
+#include <cstring>
 
 namespace siriusFM{
     enum class CcyE{ //currencies
+        UNDEFINED = -1,
         USD = 0,
         EUR = 1,
         GBP = 2,

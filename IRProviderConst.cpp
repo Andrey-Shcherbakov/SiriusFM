@@ -17,7 +17,3 @@ namespace siriusFM{
         fclose(fp);
     }
 }
-
-int main() {
-    return 0;
-}
