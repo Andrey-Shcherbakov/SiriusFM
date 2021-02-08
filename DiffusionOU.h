@@ -22,8 +22,8 @@ namespace siriusFM{
 			: m_cappa(a_cappa)
 			  m_sigma(a_sigma)
 			  m_theta(a_theta){
-				if(m_sigma <= 0) throw std::invalid_arguement('...');
-				if(m_cappa < 0)  throw std::invalid_arguement('...');
+				if(m_sigma <= 0) throw std::invalid_argument("...");
+				if(m_cappa < 0)  throw std::invalid_argument("...");
 			}
-	}
+	};
 }
