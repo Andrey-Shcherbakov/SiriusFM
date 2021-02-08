@@ -1,5 +1,5 @@
 #pragma once
-#include <IRProvider.h>
+#include "IRProvider.h"
 
 namespace siriusFM{
     template <>
@@ -11,5 +11,5 @@ namespace siriusFM{
             double r(CcyE a_ccy, double a_t)const{
                 return m_IRS[int(a_ccy)];
             }
-    }
+    };
 }

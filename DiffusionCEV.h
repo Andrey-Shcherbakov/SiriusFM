@@ -22,8 +22,8 @@ namespace siriusFM{
 			: m_mu(a_mu)
 			  m_sigma(a_sigma)
 			  m_beta(a_beta){
-				if(m_sigma <= 0) throw std::invalid_arguement('...');
-				if(m_beta < 0) 	 throw std::invalid_arguement('...');
+				if(m_sigma <= 0) throw std::invalid_argument("...");
+				if(m_beta < 0) 	 throw std::invalid_argument("...");
 			}
-	}
+	};
 }

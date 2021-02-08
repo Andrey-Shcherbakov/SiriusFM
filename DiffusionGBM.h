@@ -20,7 +20,7 @@ namespace siriusFM{
 			DiffusionGBM(double a_mu, double a_sigma)
 			: m_mu(s_mu)
 			  m_sigma(a_sigma){
-				if(m_sigma <= 0) throw std::invalid_arguement('...');
+				if(m_sigma <= 0) throw std::invalid_argument("...");
 			}
-	}
+	};
 }

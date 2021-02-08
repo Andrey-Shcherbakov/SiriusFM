@@ -24,9 +24,9 @@ namespace siriusFM{
 			  m_sigma(a_sigma0)
 			  m_sigma(a_sigma1)
               m_sigma(a_sigma2){
-				if(m_sigma0 < 0) throw std::invalid_arguement('...');
-                if(m_sigma1 < 0) throw std::invalid_arguement('...');
-                if(m_sigma1*m_sigma1-4*m_sigma0*m_sigma2 >= 0) throw std::invalid_arguement('...');
+				if(m_sigma0 < 0) throw std::invalid_argument("...");
+                if(m_sigma1 < 0) throw std::invalid_argument("...");
+                if(m_sigma1*m_sigma1-4*m_sigma0*m_sigma2 >= 0) throw std::invalid_argument("...");
 			}
-	}
+	};
 }
