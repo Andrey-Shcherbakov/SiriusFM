@@ -1,6 +1,5 @@
 #pragma once
 #include <iostream>
-#include <cstring>
 
 namespace siriusFM{
     enum class CcyE{ //currencies
