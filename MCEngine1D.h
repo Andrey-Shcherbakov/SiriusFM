@@ -3,6 +3,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <ctime>
+#include <tuple>
 
 namespace siriusFM{
     template <typename Diffusion1D,
@@ -15,11 +16,15 @@ namespace siriusFM{
             long const m_MaxL; //Max Path length
             long const m_MaxP; //Max N Paths
             double * const m_paths; //data with out pathes for MC method
+            long m_L;
+            long m_P;
         public:
             MCEngine1D(long a_MaxL, long a_MaxP)
             : m_MaxL(a_MaxL),
               m_MaxP(a_MaxP),
-              m_paths(new double[m_MaxL * m_MaxP]){
+              m_paths(new double[m_MaxL * m_MaxP]),
+              m_L(0),
+              m_P(0){
                 if(m_MaxL <= 0 || m_MaxP <= 0) throw std::invalid_argument("m_MaxL <= 0 || m_MaxP <= 0");
             };
 
@@ -35,5 +40,14 @@ namespace siriusFM{
                           AssetClassB a_B,
                           bool a_isRN //is risk-neutral flag
                           );
+             ~MCEngine1D(){
+                 delete[]m_paths;
+             };
+             std::tuple <long, long, double const *> GetPaths(){
+                 return (m_L <= 0 || m_P <= 0) ? std::make_tuple(0, 0, nullptr)
+                                               : std::make_tuple(m_L, m_P, m_paths);
+             };
+             MCEngine1D (MCEngine1D const &) = delete;
+             MCEngine1D & operator = (MCEngine1D const &) = delete;
     };
 };
