@@ -6,7 +6,7 @@
 #include <tuple>
 
 namespace siriusFM{
-    template <typename Diffusion1D,
+    template <typename Diffusion,
               typename AProvider,
               typename BProvider,
               typename AssetClassA,
@@ -28,17 +28,17 @@ namespace siriusFM{
                 if(m_MaxL <= 0 || m_MaxP <= 0) throw std::invalid_argument("m_MaxL <= 0 || m_MaxP <= 0");
             };
 
+            template <bool IsRN> //risk neutral templatisation
             void Simulate(time_t a_t0, //Curr(pricing) time
                           time_t a_T,  //Expiration time
                           int    a_tau_min, //length of tau in minutes (time step)
                           double a_s0, //the starting point
                           long a_P, //path number (half)
-                          Diffusion1D const * a_diff,
+                          Diffusion const * a_diff,
                           AProvider   const * a_rateA,
                           BProvider   const * a_rateB,
                           AssetClassA a_A,
-                          AssetClassB a_B,
-                          bool a_isRN //is risk-neutral flag
+                          AssetClassB a_B
                           );
              ~MCEngine1D(){
                  delete[]m_paths;

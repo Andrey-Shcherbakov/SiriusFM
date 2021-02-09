@@ -10,11 +10,11 @@ namespace siriusFM{
 			double const m_sigma;
 			double const m_theta;
 		public:
-			double mu(doubles a_s, double t){
+			double mu(doubles a_s, double t) const{
 				return m_cappa * (m_theta - a_s);
 			}
 
-			double sigma(doubles a_s, double t){
+			double sigma(doubles a_s, double t) const{
 				if(a_s < 0) return 0.0; //return((a_s < 0) ? 0 : m_sigma * a_s);
 				return m_sigma * a_s;
 			}

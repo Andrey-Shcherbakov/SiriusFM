@@ -5,6 +5,7 @@
 namespace siriusFM{
     IRProvider<IRModeE::Const>::IRProvider(char const * a_file){
         memset(m_IRS, 0.0, int(CcyE::N)); //setting all rates to zero
+        if(a_file == nullptr || *a_file == '\0') return;
         FILE *fp;
         char buff[255];
         fp = fopen(a_file, "r"); // reading interest rates from file

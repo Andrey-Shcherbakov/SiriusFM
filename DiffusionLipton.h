@@ -11,11 +11,11 @@ namespace siriusFM{
 			double const m_sigma1;
             double const m_sigma2;
 		public:
-			double mu(doubles a_s, double t){
+			double mu(doubles a_s, double t) const{
 				return m_mu * a_s;
 			}
 
-			double sigma(doubles a_s, double t){
+			double sigma(doubles a_s, double t) const{
 				if(a_s < 0) return 0.0; //return((a_s < 0) ? 0 : m_sigma * a_s);
 				return (m_sigma0 + m_sigma1 * a_s + m_sigma2 * std::pow(a_s, 2));
 			}

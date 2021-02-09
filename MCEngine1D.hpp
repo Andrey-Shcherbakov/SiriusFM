@@ -5,28 +5,30 @@
 #include <cassert>
 
 namespace siriusFM{
-    template <typename Diffusion1D, typename AProvider,
+    template <typename Diffusion, typename AProvider,
               typename BProvider,   typename AssetClassA, typename AssetClassB>
-    void MCEngine1D <Diffusion1D, AProvider,
+    template <bool IsRN>
+    void MCEngine1D <Diffusion, AProvider,
                      BProvider,   AssetClassA, AssetClassB>
-    ::Simulate(time_t a_t0,
-               time_t a_T,
-               int    a_tau_min,
-               double a_s0,
-               long a_P,
-               Diffusion1D const * a_diff,
-               AProvider   const * a_rateA,
-               BProvider   const * a_rateB,
-               AssetClassA a_A,
-               AssetClassB a_B,
-               bool a_isRN)
+    ::Simulate(
+    time_t a_t0,
+    time_t a_T,
+    int    a_tau_min,
+    double a_s0,
+    long a_P,
+    Diffusion   const * a_diff,
+    AProvider   const * a_rateA,
+    BProvider   const * a_rateB,
+    AssetClassA a_A,
+    AssetClassB a_B)
     {
+
         //check variables
         assert(a_diff != nullptr && a_rateA != nullptr && a_rateB != nullptr &&
                a_A != AssetClassA::UNDEFINED && a_B != AssetClassB::UNDEFINED &&
                a_t0 <= a_T && a_tau_min > 0 && a_P > 0);
 
-        double y0 = YearFrac(a_t0);
+        double y0 = YearFrac(a_t0) + 1970.0;
         time_t Tsec = a_T - a_t0;
         time_t tausec = a_tau_min * 60;
         long L = (Tsec % tausec == 0) ? Tsec / tausec      //number of intervals
@@ -60,7 +62,7 @@ namespace siriusFM{
             for(long l = 1; l < L; ++l){
                 //Compute the trend and volatility
                 double mu0 = 0.0; double mu1 = 0.0;
-                if(a_isRN){
+                if(IsRN){
                     double delta_r = a_rateB->r(a_B, y) -
                                      a_rateA->r(a_A, y);
                     mu0 = delta_r + sp0;
