@@ -27,13 +27,20 @@ namespace siriusFM{
                a_t0 <= a_T && a_tau_min > 0 && a_P > 0);
 
         double y0 = YearFrac(a_t0);
-        double yT = YearFrac(a_T);
-        double tau = double(a_tau_min)/(365.25*1440.0);
-        long L = (ceil((yT - y0)/tau)) + 1; //Path length
+        time_t Tsec = a_T - a_t0;
+        time_t tausec = a_tau_min * 60;
+        long L = (Tsec % tausec == 0) ? Tsec / tausec      //number of intervals
+                                      : Tsec / tausec + 1; //rounding
+        double tau = YearFrac(tausec);
         long P = 2 * a_P; //Antithletic variables
         double stau = sqrt(tau);
-        double tlast = yT - y0 - double(L-2) * tau;
+        double tlast = (Tsec % tausec == 0) ? tau //All tau the same
+                                            : YearFrac(Tsec - (L-1)*tausec);
         double slast = sqrt(tlast); //the duration of last interval may differ from tau
+
+        assert(0 < tlast && tlast <= tau);
+
+        L++; //L: # nodes
 
         if(L * P > m_MaxL * m_MaxP) throw std::invalid_argument("L * P > m_MaxL * m_MaxP");
         assert(slast <= stau && 0 < slast);
@@ -84,5 +91,7 @@ namespace siriusFM{
                 sp1 = sn1;
             } //End of l Loop
         } //End of p Loop
+        m_L = L;
+        m_P = P;
     };
 };
