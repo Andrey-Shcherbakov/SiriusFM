@@ -65,8 +65,8 @@ namespace siriusFM{
                 if(IsRN){
                     double delta_r = a_rateB->r(a_B, y) -
                                      a_rateA->r(a_A, y);
-                    mu0 = delta_r + sp0;
-                    mu1 = delta_r + sp1;
+                    mu0 = delta_r * sp0;
+                    mu1 = delta_r * sp1;
                 }
                 else{
                     mu0 = a_diff->mu(sp0, y);

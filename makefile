@@ -1,6 +1,6 @@
 TARGET = test
 
-SOURCES = Test1 IRProviderConst
+SOURCES = Test2 IRProviderConst Test1
 
 EXTLIBS =
 
