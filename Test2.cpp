@@ -46,8 +46,8 @@ int test2(int argc, char * argv[]){
     time_t t0 = time(nullptr);
     time_t T = t0 + T_days * 86400;
     double Ty = double(T_days) / 365.25;
-    //Run MC
-    mce.Simulate<false>(t0, T, tau_min, s0, P, &diff, &irp, &irp, ccyA, ccyA);
+    //Run MC Risk neutral
+    mce.Simulate<true>(t0, T, tau_min, s0, P, &diff, &irp, &irp, ccyA, ccyA);
 
     //Analyse the results
     auto res = mce.GetPaths();
@@ -67,7 +67,7 @@ int test2(int argc, char * argv[]){
         //++NVP;
 
         double Payoff = option->payoff(L1, nullptr, path);
-        std::cout << "Payoff = " << Payoff << '\n';
+        //std::cout << "Payoff = " << Payoff << '\n';
         EST += Payoff;
         /*double RT = log(ST/s0);
         EST += RT; EST2 += RT * RT;*/
