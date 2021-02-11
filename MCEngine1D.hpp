@@ -37,7 +37,7 @@ namespace siriusFM{
         long P = 2 * a_P; //Antithletic variables
         double stau = sqrt(tau);
         double tlast = (Tsec % tausec == 0) ? tau //All tau the same
-                                            : YearFrac(Tsec - (L-1)*tausec);
+                                            : YearFrac(Tsec - (L)*tausec);
         double slast = sqrt(tlast); //the duration of last interval may differ from tau
 
         assert(0 < tlast && tlast <= tau);
@@ -53,7 +53,7 @@ namespace siriusFM{
         //Main Simulation Loop
         for(long p = 0; p < a_P; ++p){
             double * path0 = m_paths + 2 * p * L;
-            double * path1 = m_paths + L;
+            double * path1 = path0 + L;
             path0[0] = a_s0;
             path1[0] = a_s0;
 

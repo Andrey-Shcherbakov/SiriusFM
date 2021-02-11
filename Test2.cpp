@@ -21,8 +21,8 @@ int test2(int argc, char * argv[]){
     int tau_min = atoi(argv[7]);
     long P = atol(argv[8]);
 
-    if(mu <= 0 || sigma <= 0 || s0 <= 0 || T_days <= 0 || tau_min <= 0 || P <= 0){
-        std::cerr << "mu <= 0 || sigma <= 0 || s0 <= 0 || T_days <= 0 || tau_min <= 0 || P <= 0" << std::endl;
+    if(mu < 0 || sigma <= 0 || s0 <= 0 || T_days <= 0 || tau_min <= 0 || P <= 0){
+        std::cerr << "mu < 0 || sigma <= 0 || s0 <= 0 || T_days <= 0 || tau_min <= 0 || P <= 0" << std::endl;
         return 2;
     }
 
@@ -67,6 +67,7 @@ int test2(int argc, char * argv[]){
         //++NVP;
 
         double Payoff = option->payoff(L1, nullptr, path);
+        std::cout << "Payoff = " << Payoff << '\n';
         EST += Payoff;
         /*double RT = log(ST/s0);
         EST += RT; EST2 += RT * RT;*/
