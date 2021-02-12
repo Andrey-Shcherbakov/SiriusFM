@@ -1,95 +1,121 @@
-#include "IRProviderConst.h"
 #include "DiffusionGBM.h"
+#include "IRProviderConst.h"
 #include "MCEngine1D.hpp"
-#include "VanillaOption.h"
+#include "VanillaOptions.h"
 
-using namespace siriusFM;
+namespace SiriusFM
+{
+  // Path Evaluator for Option Pricing:
+  class OPPathEval
+  {
+  private:
+    OptionFX const* const m_option;
+    long   m_P;     // Total paths evaluated
+    double m_sum;   // Sum of Payoffs
+    double m_sum2;  // Sum of Payoff^2
+    double m_minPO; // Min PayOff
+    double m_maxPO; // Max PayOff
+
+  public:
+    OPPathEval(OptionFX const* a_option)
+    : m_option(a_option),
+      m_P     (0),
+      m_sum   (0),
+      m_sum2  (0),
+      m_minPO ( INFINITY),
+      m_maxPO (-INFINITY)
+
+    { assert(m_option != nullptr); }
+
+    void operator() (long a_L,     long a_PM,
+                     double const* a_paths, double const* a_ts)
+    {
+      for (long p = 0; p < a_PM; ++p)
+      {
+        double const* path = a_paths + p * a_L;
+        double payOff      = m_option->Payoff(a_L, path, a_ts);
+        m_sum  += payOff;
+        m_sum2 += payOff * payOff;
+        m_minPO = std::min<double>(m_minPO, payOff);
+        m_maxPO = std::max<double>(m_maxPO, payOff);
+      }
+      m_P += a_PM;
+    }
+
+    // GetPxStats returns (E[Px], StD[Px]/E[Px]):
+    std::pair<double, double> GetPxStats() const
+    {
+      if (m_P < 2)
+        throw std::runtime_error("Empty OPPathEval");
+      double px  =  m_sum  / double(m_P);
+      double var = (m_sum2 - double(m_P) * px * px) / double(m_P - 1);
+      assert(var >= 0);
+      double err = (px != 0) ? sqrt(var) / fabs(px) : sqrt(var);
+      return std::make_pair(px, err);
+    }
+  };
+}
+
+using namespace SiriusFM;
 using namespace std;
 
-int test2(int argc, char * argv[]){
-    if(argc != 9){
-        std::cerr << "PARAMS: mu, sigma, s0, Call/Put, K, T_days, tau_min, P" << std::endl;
-        return 1;
-    }
+int main(int argc, char** argv)
+{
+	if(argc != 9)
+	{
+		cerr << "params: mu, sigma, S0,\nCall/Put, K, Tdays,\ntau_mins, P\n";
+		return 1;
+	}
+	double mu = atof(argv[1]);
+	double sigma = atof(argv[2]);
+	double S0 = atof(argv[3]);
+	const char* OptType = argv[4];
+	double K = atof(argv[5]);
+	long T_days = atol(argv[6]);
+	int tau_mins = atoi(argv[7]);
+	long P = atol(argv[8]);
 
-    double mu = atof(argv[1]);
-    double sigma = atof(argv[2]);
-    double s0 = atof(argv[3]);
-    char const * opt_type = argv[4];
-    double K = atof(argv[5]);
-    long T_days = atol(argv[6]);
-    int tau_min = atoi(argv[7]);
-    long P = atol(argv[8]);
+	assert(sigma > 0 &&
+		   S0 > 0 &&
+		   T_days > 0 &&
+		   tau_mins > 0 &&
+		   P > 0 &&
+		   K > 0);
 
-    if(mu < 0 || sigma <= 0 || s0 <= 0 || T_days <= 0 || tau_min <= 0 || P <= 0){
-        std::cerr << "mu < 0 || sigma <= 0 || s0 <= 0 || T_days <= 0 || tau_min <= 0 || P <= 0" << std::endl;
-        return 2;
-    }
+	CcyE ccyA = CcyE::USD;
+	CcyE ccyB = CcyE::USD;
 
-    Option const * option;
-    if(strcmp(opt_type, "Call") == 0){
-        option = new EurCallOption(K, T_days);
-    }
-    else if(strcmp(opt_type, "Put") == 0) {
-        option = new EurPutOption(K, T_days);
-    }
-    else throw std::invalid_argument("There is no such Option type");
+	IRProvider<IRModeE::Const> irp(nullptr);
+	DiffusionGBM diff(mu, sigma, S0);
 
-    CcyE ccyA = CcyE::USD;
-    IRProvider<IRModeE::Const> irp("IRFile.txt");
-    DiffusionGBM diff(mu, sigma);
+	MCEngine1D<decltype(diff), decltype(irp), decltype(irp),
+             CcyE, CcyE, OPPathEval>
+    mce(20000, 20000);
 
-    MCEngine1D <decltype(diff), decltype(irp), decltype(irp),
-                decltype(ccyA), decltype(ccyA)>
-    mce(20'000, 20'000); //400 m
+	OptionFX const* opt = (strcmp(OptType, "Call") == 0)
+						? static_cast<OptionFX*>(new EurCallOptionFX(ccyA, ccyB, K, T_days))
+						:
+						(strcmp(OptType, "Put") == 0)
+						? static_cast<OptionFX*> (new EurPutOptionFX(ccyA, ccyB, K, T_days))
+						:throw invalid_argument("Bad option type");
 
-    time_t t0 = time(nullptr);
-    time_t T = t0 + T_days * 86400;
-    double Ty = double(T_days) / 365.25;
-    //Run MC Risk neutral
-    mce.Simulate<true>(t0, T, tau_min, s0, P, &diff, &irp, &irp, ccyA, ccyA);
+	time_t t0 = time(nullptr);
+	time_t T = t0 + SEC_IN_DAY * T_days;
 
-    //Analyse the results
-    auto res = mce.GetPaths();
-    long L1 = get<0>(res);
-    long P1 = get<1>(res);
-    double const *paths = get<2>(res);
+  // Path Evaluator:
+  OPPathEval pathEval(opt);
 
-    //Compute E (expexted value) of Log st
-    double EST  = 0.0;
-    //double EST2 = 0.0;
-    //int NVP = 0; //Valid Paths
-    for(int p = 0; p < P1; ++p){
-        double const *path = paths + p * L1;
-        /*double ST = path[L1 - 1];
-        //In practice may get ST < 0
-        if (ST <= 0) continue;*/
-        //++NVP;
+	//Run MC: Option pricing is Risk-Neutral:
+	// UseTimerSeed=true:
+	mce.Simulate<true>
+    (t0, T, tau_mins, P, true, &diff, &irp, &irp, ccyA, ccyB, &pathEval);
 
-        double Payoff = option->payoff(L1, nullptr, path);
-        //std::cout << "Payoff = " << Payoff << '\n';
-        EST += Payoff;
-        /*double RT = log(ST/s0);
-        EST += RT; EST2 += RT * RT;*/
-    } //End of p Loop
+  auto res   = pathEval.GetPxStats();
+  double px  = res.first;
+  double err = res.second;
 
-    //assert(NVP > 0);
-    EST /= double (P1); //mu - sigma^2/2
-    EST *= exp((-1)*irp.r(ccyA, 0)*Ty);
-    //Now find variation of ST
-    /*double VarST = (EST2 - double (NVP) * EST * EST) / double(NVP - 1); //sigma^2T
-    double sigma2E = VarST / Ty;
-    double muE = (EST + VarST/2.0) / Ty;
+  cout << "Px=" << px << ", RelErr=" << err << endl;
 
-    cout << "mu = " << mu << "muE =" << muE << endl;
-    cout << "sigma2 = " << sigma * sigma << "sigma2E =" << sigma2E << endl;*/
-
-    cout << "Option price = " << EST << endl;
-
-    return 0;
-};
-
-int main(int argc, char * argv[]){
-    test2(argc, argv);
-    return 0;
+  delete opt;
+	return 0;
 }

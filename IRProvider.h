@@ -2,7 +2,7 @@
 #include <iostream>
 #include <cstring>
 
-namespace siriusFM{
+namespace SiriusFM{
     enum class CcyE{ //currencies
         UNDEFINED = -1,
         USD = 0,

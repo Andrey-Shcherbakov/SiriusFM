@@ -2,7 +2,7 @@
 #include "DiffusionGBM.h"
 #include "MCEngine1D.hpp"
 
-using namespace siriusFM;
+using namespace SiriusFM;
 using namespace std;
 
 int test1(int argc, char * argv[]){

@@ -1,25 +1,47 @@
 #pragma once
-#include <iostream>
+#include "IRProvider.h"
+#include <ctime>
 
-namespace siriusFM{
-    class Option{
-        protected: //can be seen from our class hierarchy
-            bool const m_IsAmerican;
-            int  const m_Tdays; //Tdays > 0
+namespace SiriusFM
+{
+  //=========================================================================//
+  // Fully-Generic "Option":                                                 //
+  //=========================================================================//
+  template<typename AssetClassA, typename AssetClassB>
+	class Option
+	{
+  public:
+    AssetClassA const m_assetA;  // Option Underlying Instrument: A/B
+    AssetClassB const m_assetB;
+    time_t      const m_expirTime;
+		bool        const m_isAmerican;
 
-            Option(int a_Tdays, bool a_IsAmerican)
-            :m_IsAmerican(a_IsAmerican),
-             m_Tdays(a_Tdays){
-                //Checks:
-                if(m_Tdays <= 0)  throw std::invalid_argument("m_Tdays <= 0");
-            };
-        public:
-            bool IsAmerican() const{
-                return m_IsAmerican;
-            };
+		Option
+    (
+      AssetClassA a_assetA,
+      AssetClassB a_assetB,
+      time_t      a_expirTime,
+      bool        a_isAmerican
+    )
+    : m_assetA    (a_assetA),
+      m_assetB    (a_assetB),
+      m_expirTime (a_expirTime),
+      m_isAmerican(a_isAmerican)
+    {}
 
-            virtual double payoff (long a_L, double const * a_t, double const * a_s) const = 0; // vertual smth = 0 means that this method is abstract
+		virtual double Payoff
+    (
+      long a_L,
+		  double const* a_path,
+			double const* a_ts
+    )
+    const = 0;
 
-            virtual ~Option(){};
-    };
+		virtual ~Option() {};
+	};
+
+  //=========================================================================//
+  // Alias: "OptionFX":                                                      //
+  //=========================================================================//
+  using OptionFX = Option<CcyE, CcyE>;
 }
