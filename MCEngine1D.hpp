@@ -72,6 +72,7 @@ namespace SiriusFM{
         for (long i = 0; i < PI; ++i)
         {
             // Generate in-memory paths:
+            #pragma acc parallel loop
             for(long p = 0; p < PMh; ++p)
             {
                 double * path0 = m_paths + 2 * p * L;

@@ -7,9 +7,11 @@ SOURCES = Test4 IRProviderConst
 
 EXTLIBS =
 
+CXXFLAGS += nvc++
 CXXFLAGS += -MP -MMD -fPIC
 CXXFLAGS += -std=c++17 -Wall
 CXXFLAGS += -O3 -DNDEBUG -march=native -mtune=native
+CXXFLAGS += -acc
 #CXXFLAGS += -O0 -g
 
 #LDFLAGS += -v
